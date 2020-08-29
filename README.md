@@ -2,6 +2,10 @@
 
 > a simple scheduled alerts program using the Discord WEB API
 
+[![Linux](https://github.com/lewis-weinberger/psa/workflows/Linux/badge.svg)](https://github.com/lewis-weinberger/psa/actions)
+[![MacOS](https://github.com/lewis-weinberger/psa/workflows/MacOS/badge.svg)](https://github.com/lewis-weinberger/psa/actions)
+[![Windows](https://github.com/lewis-weinberger/psa/workflows/Windows/badge.svg)](https://github.com/lewis-weinberger/psa/actions)
+
 ## Usage
 
 Install [SBCL](http://www.sbcl.org/platform-table.html) and [Quicklisp](https://www.quicklisp.org/beta/).
@@ -32,6 +36,8 @@ where:
     EVENTS-DIRECTORY -- path to directory containing event files
     TIME-FRAME -- number of days before event to issue notifications
 ```
+
+## Event format
 
 An event file should be written in JSON with the following fields:
 

@@ -1,0 +1,26 @@
+name: Linux
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: install SBCL
+      run: sudo apt-get install sbcl
+    - name: install Quicklisp
+      run: |
+        wget https://beta.quicklisp.org/quicklisp.lisp
+        sbcl --disable-debugger --load quicklisp.lisp --eval '(quicklisp-quickstart:install)'
+    - name: checkout repository
+      uses: actions/checkout@v2
+    - name: set up quicklisp/local-projects
+      run: ln -s ${GITHUB_WORKSPACE} ~/quicklisp/local-projects/psa
+    - name: compilation
+      run: sbcl --disable-debugger --load ~/quicklisp/setup.lisp --eval '(ql:quickload :psa)' --eval '(asdf:make :psa)'
+    - name: build check
+      run: ls -lh bin
