@@ -37,6 +37,8 @@ where:
     TIME-FRAME -- number of days before event to issue notifications
 ```
 
+Each time `psa` is invoked it will scan the provided events directory, parse any JSON event files (see below) and send a message to the given Discord webhook when that event is drawing near. Thus a simple setup could use a job scheduler (such as [cron](https://en.wikipedia.org/wiki/Cron)) to call `psa` every day.
+
 ## Event format
 
 An event file should be written in JSON with the following fields:
@@ -48,7 +50,7 @@ An event file should be written in JSON with the following fields:
     "style": "Public announcement"
 }
 ```
-Note the date format should be "YYYY-MM-DD". For every event you'd like to be notified about, add a JSON file as above to your desired events directory. `psa` will scan this directory, parse the event files and send a message to the given Discord webhook when that event is drawing near. The message will appear as:
+Note the date format should be "YYYY-MM-DD". For every event you'd like to be notified about, add a JSON file as above to your desired events directory. The message for the above example will appear as:
 
 ```
 [2020-07-29] Public announcement: Saskia's Birthday

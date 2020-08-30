@@ -40,14 +40,7 @@
 ;;; Configuration -------------------------------------------------------------
 
 (defvar *version* 0.1)            ; version number
-(defvar *sleep* 1)                ; time [in days] in between events checking
-;(setf deploy:*status-output* nil) ; turn off Deploy's status output
-
-(defun start-swank ()
-  "Start swank for runtime SLIME interaction."
-  (swank:create-server :port 4003
-		       :style swank:*communication-style*
-		       :dont-close t))
+(setf deploy:*status-output* nil) ; turn off Deploy's status output
 
 ;;; Webhook interaction -------------------------------------------------------
 
@@ -133,29 +126,25 @@ for each event that is scheduled to happen within WINDOW days."
   (multiple-value-bind (webhook dir window)
       (parse-args)
     (format t
-	    "~%Webhook: ~a~%Events: ~a~%Sleep: ~a day(s)~%~%"
+	    "~%Webhook: ~a~%Events: ~a~%Window: ~a day(s)~%~%"
 	    webhook
 	    dir
 	    window)
-    (loop
-       (loop :for f :in dir :do
-	    (multiple-value-bind (date description style)
-		(parse-event f)
-	      (format t
-		      "Date: ~a, Description: ~a, Style: ~a~%"
-		      date
-		      description
-		      style)
-	      (when (check-date date window)
-		(format t "Sending notification!~%")
-		(alert webhook
-		       (format nil "[~a] ~a: ~a" date style description)))))
-       (format t "Sleeping for ~a day(s)...~%" *sleep*)
-       (sleep (* *sleep* 86400)))))
+    (loop :for f :in dir :do
+	 (multiple-value-bind (date description style)
+	     (parse-event f)
+	   (format t
+		   "Date: ~a, Description: ~a, Style: ~a~%"
+		   date
+		   description
+		   style)
+	   (when (check-date date window)
+	     (format t "Sending notification!~%")
+	     (alert webhook
+		    (format nil "[~a] ~a: ~a" date style description)))))))
 
 (defun main ()
   "Run the main-loop, catching interrupts."
-  (start-swank)
   (handler-case (main-loop)
     (sb-sys:interactive-interrupt () (sb-ext:exit))))
 
