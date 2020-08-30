@@ -22,7 +22,7 @@ Compile the program:
 sbcl --eval "(ql:quickload :psa)" --eval "(asdf:make :psa)"
 ```
 
-This should create a `bin` directory containing the executable `psa`. Quicklisp should bring in the dependencies ([drakma](https://edicl.github.io/drakma/), [cl-json](https://common-lisp.net/project/cl-json/cl-json.html), [local-time](https://common-lisp.net/project/local-time/) and [swank](https://www.cliki.net/Swank)). Finally you can find usage help by invoking `psa` with no arguments, which should print something like:
+This should create a `bin` directory containing the executable `psa`. Quicklisp should bring in the dependencies ([drakma](https://edicl.github.io/drakma/), [cl-json](https://common-lisp.net/project/cl-json/cl-json.html), [local-time](https://common-lisp.net/project/local-time/) and [deploy](https://github.com/Shinmera/deploy)). Finally you can find usage help by invoking `psa` with no arguments, which should print something like:
 
 ```
 _______________

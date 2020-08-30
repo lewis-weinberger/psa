@@ -32,8 +32,7 @@
 	   #:check-date
 	   #:main-loop
 	   #:main
-	   #:*version*
-	   #:*sleep*))
+	   #:*version*))
 
 (in-package :psa)
 
