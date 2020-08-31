@@ -37,7 +37,7 @@ where:
     TIME-FRAME -- number of days before event to issue notifications
 ```
 
-Each time `psa` is invoked it will scan the provided events directory, parse any JSON event files (see below) and send a message to the given Discord webhook when that event is drawing near. Thus a simple setup could use a job scheduler (such as [cron](https://en.wikipedia.org/wiki/Cron)) to call `psa` every day.
+Each time `psa` is invoked it will scan the provided events directory, parse any JSON event files (see below) and send a message to the given Discord webhook when that event is drawing near. Thus a simple setup could use a job scheduler (such as [cron](https://en.wikipedia.org/wiki/Cron)) to call `psa` every day. Example [systemd](https://www.freedesktop.org/wiki/Software/systemd/) timer and service units are included in the systemd directory. Enabling the timer unit will result in the service unit running daily at 12:00. These units assume that psa is installed at `/usr/local/bin`.
 
 ## Event format
 
