@@ -1,0 +1,8 @@
+[Unit]
+Description=Run psa
+
+[Service]
+Type=oneshot
+EnvironmentFile=/usr/local/etc/psa.env
+ExecStart=/usr/local/bin/psa ${WEBHOOK_URL} ${EVENTS_DIR} ${NOTICE_PERIOD}
+
