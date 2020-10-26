@@ -21,6 +21,6 @@ jobs:
     - name: set up quicklisp/local-projects
       run: ln -s ${GITHUB_WORKSPACE} ~/quicklisp/local-projects/psa
     - name: compilation
-      run: make
+      run: sbcl --disable-debugger --load ~/quicklisp/setup.lisp --eval '(ql:quickload :psa)' --eval '(asdf:make :psa)'
     - name: build check
       run: ls -lh
