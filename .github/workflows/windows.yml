@@ -34,4 +34,4 @@ jobs:
         set SBCL_HOME=%GITHUB_WORKSPACE%\sbcl\PFiles\Steel Bank Common Lisp\2.0.0
         cd "%SBCL_HOME%"
         sbcl.exe --non-interactive --load "%GITHUB_WORKSPACE%\quicklisp\setup.lisp" --eval "(push #p\"D:/a/psa/psa/\" asdf:*central-registry*)" --eval "(ql:quickload :psa)" --eval "(asdf:make :psa)"
-        dir "%GITHUB_WORKSPACE%\bin"
+        dir "%GITHUB_WORKSPACE%"
