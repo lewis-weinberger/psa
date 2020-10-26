@@ -8,7 +8,7 @@
 
 ## Usage
 
-Install [SBCL](http://www.sbcl.org/platform-table.html) and [Quicklisp](https://www.quicklisp.org/beta/).
+Install a Common Lisp implementation (e.g. [SBCL](http://www.sbcl.org/platform-table.html), [ECL](https://common-lisp.net/project/ecl/), etc.) and [Quicklisp](https://www.quicklisp.org/beta/).
 
 Clone the repository to your `quicklisp/local-projects` directory:
 
@@ -16,13 +16,13 @@ Clone the repository to your `quicklisp/local-projects` directory:
 git clone https://github.com/lewis-weinberger/psa.git ~/quicklisp/local-projects/psa
 ```
 
-Compile the program:
+Compile the program using `make`:
 
 ```sh
-sbcl --eval "(ql:quickload :psa)" --eval "(asdf:make :psa)"
+make LISP=sbcl    # set LISP to desired implementation
 ```
 
-This should create a `bin` directory containing the executable `psa`. Quicklisp should bring in the dependencies ([drakma](https://edicl.github.io/drakma/), [cl-json](https://common-lisp.net/project/cl-json/cl-json.html), [local-time](https://common-lisp.net/project/local-time/) and [deploy](https://github.com/Shinmera/deploy)). Finally you can find usage help by invoking `psa` with no arguments, which should print something like:
+This should create the executable `psa`. Quicklisp should bring in the dependencies ([drakma](https://edicl.github.io/drakma/), [cl-json](https://common-lisp.net/project/cl-json/cl-json.html), and [local-time](https://common-lisp.net/project/local-time/)). Finally you can find usage help by invoking `psa` with no arguments, which should print something like:
 
 ```
 _______________

@@ -7,8 +7,7 @@
   :source-control (:git "git@github.com:lewis-weinberger/psa.git")
   :description "A simple alerts system using the Discord API."
   :depends-on (:drakma :cl-json :local-time)
-  :defsystem-depends-on (:deploy)
-  :build-operation "deploy-op"
+  :build-operation "program-op"
   :build-pathname "psa"
   :entry-point "psa:main"
   :components ((:file "psa")))
