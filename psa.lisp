@@ -1,4 +1,4 @@
-;;;; Copyright 2020 Lewis Weinberger
+;;;; Copyright 2021 Lewis Weinberger
 ;;;;
 ;;;; Permission is hereby granted, free of charge, to any person obtaining
 ;;;; a copy of this software and associated documentation files (the
@@ -27,12 +27,12 @@
 (defpackage :psa
   (:use :common-lisp)
   (:export #:alert
-       #:parse-event
-       #:string-to-date
-       #:check-date
-       #:main-loop
-       #:main
-       #:*version*))
+           #:parse-event
+           #:string-to-date
+           #:check-date
+           #:main-loop
+           #:main
+           #:*version*))
 
 (in-package :psa)
 
@@ -40,7 +40,29 @@
 
 (defvar *major-version* 0)
 (defvar *minor-version* 1)
-(defvar *patch-version* 1)
+(defvar *patch-version* 2)
+
+;;; Macros --------------------------------------------------------------------
+
+(defmacro panic-on-condition (&body body)
+  "Run BODY, panicking if a condition is caught."
+  (let ((err (gensym)))
+    `(handler-case
+         ,@body
+       (error (,err) (progn
+                       (format t "Panicking due to condition: ~A~%" ,err)
+                       (usage))))))
+
+(defmacro continue-on-condition (&body body)
+  "Run BODY, continuing if a condition is caught."
+  (let ((err (gensym)))
+    `(handler-case
+         ,@body
+       (error (,err) (format t "Continuing despite condition: ~A~%" ,err)))))
+
+(defmacro get-alist (key alist)
+  "Get val from ALIST of (KEY . val) pairs."
+  `(cdr (assoc ,key ,alist)))
 
 ;;; Webhook interaction -------------------------------------------------------
 
@@ -48,55 +70,42 @@
 
 (defun alert (webhook message)
   "Send an alert to the WEBHOOK, posting the given MESSAGE."
-  (handler-case
-      (drakma:http-request webhook
-               :method :post
-               :parameters `(("content" . ,message)))
-    (drakma:parameter-error () (progn
-                                 (format t "Error contacting webhook!~%")
-                                 (usage)))))
+  (panic-on-condition
+    (drakma:http-request webhook
+                         :method :post
+                         :parameters `(("content" . ,message)))))
 
 ;;; Event parsing -------------------------------------------------------------
 
-(defmacro handle-error (msg)
-  `(progn (format t ,msg) nil))
-
-(defmacro get-alist (obj alist)
-  `(cdr (assoc ,obj ,alist)))
-
 (defun parse-event (filepath)
   "Reads the event file at FILEPATH."
-  (handler-case
-      (let* ((event (json:decode-json-from-source filepath))
-         (date (get-alist :date event))
-         (description (get-alist :description event))
-         (style (get-alist :style event)))
-    (values date description style))
-    (end-of-file () (handle-error "Reached EOF while parsing JSON.~%"))
-    (json:json-syntax-error () (handle-error "JSON syntax error.~%"))))
+  (continue-on-condition
+    (let* ((event (json:decode-json-from-source filepath))
+           (date (get-alist :date event))
+           (description (get-alist :description event))
+           (style (get-alist :style event)))
+      (values date description style))))
 
 (defun string-to-date (string)
   "Converts STRING in format YYYY-MM-DD to a timestamp."
   (let* ((split (uiop:split-string string :separator "-"))
-     (year (parse-integer (first split)))
-     (month (parse-integer (second split)))
-     (day (parse-integer (third split))))
+         (year (parse-integer (first split)))
+         (month (parse-integer (second split)))
+         (day (parse-integer (third split))))
     (local-time:encode-timestamp 0 0 0 0 day month year)))
 
 (defun check-date (date window)
   "Check if DATE is going to occur in WINDOW days."
-  (handler-case
-      (if date
-      (let* ((timestamp (string-to-date date))
-         (now (local-time:now))
-         (min-time (local-time:timestamp+ now (1- window) :day))
-         (max-time (local-time:timestamp+ now window :day)))
-        (and
-         (local-time:timestamp> timestamp min-time)
-         (local-time:timestamp<= timestamp max-time)))
-      nil)
-    (error () (handle-error (format nil "~a is not a valid date!~%" date)))
-    (local-time::invalid-time-specification () nil)))
+  (continue-on-condition
+    (if date
+        (let* ((timestamp (string-to-date date))
+               (now (local-time:now))
+               (min-time (local-time:timestamp+ now (1- window) :day))
+               (max-time (local-time:timestamp+ now window :day)))
+          (and
+           (local-time:timestamp> timestamp min-time)
+           (local-time:timestamp<= timestamp max-time)))
+        nil)))
 
 ;;; Entry point ---------------------------------------------------------------
 
@@ -117,12 +126,13 @@ where:
 
 (defun parse-args ()
   "Read and check command-line arguments."
-  (let ((args uiop:*command-line-arguments*))
-    (when (/= (length args) 3)
-      (usage))
-    (values (first args)
-        (directory (concatenate 'string (second args) "/*.json"))
-        (parse-integer (third args)))))
+  (panic-on-condition
+    (let ((args uiop:*command-line-arguments*))
+      (when (/= (length args) 3)
+        (usage))
+      (values (first args)
+              (directory (concatenate 'string (second args) "/*.json"))
+              (parse-integer (third args))))))
 
 (defun main-loop ()
   "Process the event files in EVENTS-DIRECTORY, sending an alert to WEBHOOK
@@ -130,22 +140,22 @@ for each event that is scheduled to happen within WINDOW days."
   (multiple-value-bind (webhook dir window)
       (parse-args)
     (format t
-        "~%Webhook: ~a~%Events: ~a~%Window: ~a day(s)~%~%"
-        webhook
-        dir
-        window)
+            "~%Webhook: ~a~%Events: ~a~%Window: ~a day(s)~%"
+            webhook
+            dir
+            window)
     (loop :for f :in dir :do
-     (multiple-value-bind (date description style)
-         (parse-event f)
-       (format t
-           "Date: ~a, Description: ~a, Style: ~a~%"
-           date
-           description
-           style)
-       (when (check-date date window)
-         (format t "Sending notification!~%")
-         (alert webhook
-            (format nil "[~a] ~a: ~a" date style description)))))))
+      (multiple-value-bind (date description style)
+          (parse-event f)
+        (format t
+                "~%Date: ~a, Description: ~a, Style: ~a~%"
+                date
+                description
+                style)
+        (when (check-date date window)
+          (format t "Sending notification!~%")
+          (alert webhook
+                 (format nil "[~a] ~a: ~a" date style description)))))))
 
 (defun main ()
   "Run the main-loop, catching interrupts."
@@ -155,5 +165,7 @@ for each event that is scheduled to happen within WINDOW days."
      #+clisp system::simple-interrupt-condition
      #+ecl ext:interactive-interrupt
      #+allegro excl:interrupt-signal
-     ()
-     (uiop:quit))))
+     (sig)
+      (progn
+        (format t "~%Exited due to: ~A~%" sig)
+        (uiop:quit)))))

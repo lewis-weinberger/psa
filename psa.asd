@@ -1,7 +1,7 @@
 (defsystem psa
   :author "Lewis Weinberger"
   :license "MIT"
-  :version "0.1.0"
+  :version "0.1.2"
   :homepage "https://github.com/lewis-weinberger/psa"
   :bug-tracker "https://github.com/lewis-weinberger/psa/issues"
   :source-control (:git "git@github.com:lewis-weinberger/psa.git")
