@@ -84,6 +84,11 @@
            (date (get-alist :date event))
            (description (get-alist :description event))
            (style (get-alist :style event)))
+      (format t
+              "~%Date: ~a, Description: ~a, Style: ~a~%"
+              date
+              description
+              style)
       (values date description style))))
 
 (defun string-to-date (string)
@@ -130,28 +135,24 @@ where:
     (let ((args uiop:*command-line-arguments*))
       (when (/= (length args) 3)
         (usage))
-      (values (first args)
-              (directory (concatenate 'string (second args) "/*.json"))
-              (parse-integer (third args))))))
+      (let ((webhook (first args))
+            (dir (directory (concatenate 'string (second args) "/*.json")))
+            (window (parse-integer (third args))))
+        (format t
+                "~%Webhook: ~a~%Events: ~a~%Window: ~a day(s)~%"
+                webhook
+                dir
+                window)
+        (values webhook dir window)))))
 
 (defun main-loop ()
   "Process the event files in EVENTS-DIRECTORY, sending an alert to WEBHOOK
 for each event that is scheduled to happen within WINDOW days."
   (multiple-value-bind (webhook dir window)
       (parse-args)
-    (format t
-            "~%Webhook: ~a~%Events: ~a~%Window: ~a day(s)~%"
-            webhook
-            dir
-            window)
     (loop :for f :in dir :do
       (multiple-value-bind (date description style)
           (parse-event f)
-        (format t
-                "~%Date: ~a, Description: ~a, Style: ~a~%"
-                date
-                description
-                style)
         (when (check-date date window)
           (format t "Sending notification!~%")
           (alert webhook
