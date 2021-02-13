@@ -50,7 +50,9 @@
     `(handler-case
          ,@body
        (error (,err) (progn
-                       (format t "Panicking due to condition: ~A~%" ,err)
+                       (format *error-output*
+                               "Panicking due to condition: ~A~%"
+                               ,err)
                        (usage))))))
 
 (defmacro continue-on-condition (&body body)
@@ -58,7 +60,9 @@
   (let ((err (gensym)))
     `(handler-case
          ,@body
-       (error (,err) (format t "Continuing despite condition: ~A~%" ,err)))))
+       (error (,err) (format *error-output*
+                             "Continuing despite condition: ~A~%"
+                             ,err)))))
 
 (defmacro get-alist (key alist)
   "Get val from ALIST of (KEY . val) pairs."
@@ -116,7 +120,7 @@
 
 (defun usage ()
   "Print a helpful usage message and exit."
-  (format t "_______________
+  (format *error-output* "_______________
 psa version ~a.~a.~a
 
 Usage:
